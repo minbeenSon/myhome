@@ -2,48 +2,86 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="fragments/common :: head('게시판')">
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
-    integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
-  <link href="starter-template.css" th:href="@{/starter-template.css}" rel="stylesheet">
-
-  <title></title>
+  <!-- fragments -->
 </head>
 
 <body>
 
 
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" th:replace="fragments/common :: menu('board')">
-    <!-- <a class="navbar-brand" href="#">Spring Boot</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-      aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="#">홈<span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">게시물</a>
-        </li>
-      </ul>
-    </div> -->
+    <!-- framents -->
   </nav>
 
   <main role="main" class="container">
 
     <div class="container">
-        <h1>게시판</h1>
+      <h1>게시판</h1>
+      <div>총건수 : <span th:text="${boards.totalElements}"></span></div>
+
+      <table class="table mt-2">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">번호</th>
+            <th scope="col">제목</th>
+            <th scope="col">작성자</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="board : ${boards}">
+            <th th:text="${board.id}"></th>
+            <td><a th:text="${board.title}" th:href="@{/board/view(id = ${board.id})}"></a></td>
+            <td>홍길동</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="mb-1" ;>
+        <form th:href="@{/board/list}" method="get" class="form-inline my-2 my-lg-0">
+          <select name="searchType" id="inputState" class="form-control" style="width: 15%;">
+            <option value="제목내용" selected>제목+내용</option>
+            <option value="제목">제목</option>
+            <option value="내용">내용</option>
+          </select>
+          <input name="searchKeyword" class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+          <button class="btn btn-secondary my-2 my-sm-0" type="submit">검색</button>
+        </form>
+      </div>
+
+      <div class="text-right">
+        <a type="button" class="btn btn-primary" href="/board/form">게시물작성</a>
+      </div>
+
+      <div class="d-flex justify-content-center">
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item" th:classappend="${1 == boards.pageable.pageNumber + 1} ? 'disabled'">
+              <a class="page-link" href="#"
+                th:href="@{/board/list(page = ${boards.pageable.pageNumber -1}, searchType = ${param.searchType}, searchKeyword = ${param.searchKeyword})}"
+                aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+
+            <th:block th:each="page : ${#numbers.sequence(startPage,endPage)}">
+              <strong class="page-item page-link" th:if="${page == nowPage}" th:text="${page}"
+                style="color: black;"></strong>
+              <li class="page-item"><a class="page-link" th:if="${page != nowPage}" th:text="${page}"
+                  th:href="@{/board/list(page = ${page - 1}, searchType = ${param.searchType}, searchKeyword = ${param.searchKeyword})}">1</a>
+              </li>
+            </th:block>
+
+            <li class="page-item" th:classappend="${boards.totalPages == boards.pageable.pageNumber + 1} ? 'disabled'">
+              <a class="page-link" href="#"
+                th:href="@{/board/list(page = ${boards.pageable.pageNumber + 1}, searchType = ${param.searchType}, searchKeyword = ${param.searchKeyword})}"
+                aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
-
   </main>
-
-
 
   <!-- Optional JavaScript; choose one of the two! -->
 

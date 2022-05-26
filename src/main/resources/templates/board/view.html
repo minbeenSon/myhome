@@ -1,23 +1,29 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/common :: head('Hello SpringBoot')">
+<head th:replace="fragments/common :: head('게시판상세')">
   <!-- fragments -->
 </head>
 
 <body>
 
 
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" th:replace="fragments/common :: menu('home')">
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" th:replace="fragments/common :: menu('board')">
     <!-- fragments -->
   </nav>
 
   <main role="main" class="container">
 
-    <div class="starter-template">
-      <h1>Spring Boot Tutorial</h1>
-      <p class="lead">스프링부트를 이용해 웹 페이지 제작<br>
-        Spring Security, JPA 를 이용해 보안 설정과 데이터 다루기</p>
+    <div class="container">
+      <h1 th:text="${board.title}"></h1>
+      <div>
+        <p th:text="${board.content}"></p>
+      </div>
+      <div>
+        <a type="button" class="btn btn-primary" th:href="@{/board/modify(id = ${board.id})}">글수정</a>
+        <a type="button" class="btn btn-danger" th:href="@{/board/delete(id = ${board.id})}">글삭제</a>
+      </div>
+
     </div>
 
   </main>
