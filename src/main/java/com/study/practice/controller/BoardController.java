@@ -1,6 +1,7 @@
 package com.study.practice.controller;
 
 import com.study.practice.entity.Board;
+import com.study.practice.entity.User;
 import com.study.practice.repository.BoardRepository;
 import com.study.practice.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,8 +26,6 @@ public class BoardController {
 
     @Autowired
     private BoardService boardService;
-    @Autowired
-    private BoardRepository boardRepository;
 
     @GetMapping("/list")
     public String boardList(Model model,
@@ -58,8 +60,9 @@ public class BoardController {
     }
 
     @PostMapping("/form/process")
-    public String boardWriteProcess(Board board, Model model) {
-        boardService.boardWrite(board);
+    public String boardWriteProcess(Board board, Model model, Authentication authentication) {
+        String username = authentication.getName();
+        boardService.boardWrite(username, board);
 
         model.addAttribute("message", "게시물작성이 완료되었습니다.");
         model.addAttribute("searchUrl", "/board/list");
@@ -73,10 +76,19 @@ public class BoardController {
     }
 
     @GetMapping("/delete")
-    public String boardDelete(Integer id, Model model) {
-        boardService.boardDelete(id);
-        model.addAttribute("message", "게시물삭제가 완료되었습니다.");
-        model.addAttribute("searchUrl", "/board/list");
+    public String boardDelete(Integer id, Model model, Authentication authentication) {
+        Board board = boardService.boardView(id);
+        String boardUsername = board.getUser().getUsername();
+        String loggedinUsername = authentication.getName();
+
+        if(boardUsername.equals(loggedinUsername)) {
+            boardService.boardDelete(id);
+            model.addAttribute("message", "게시물삭제가 완료되었습니다.");
+            model.addAttribute("searchUrl", "/board/list");
+        } else {
+            model.addAttribute("message", "본인의 게시물만 삭제 가능합니다.");
+            model.addAttribute("searchUrl", "/board/view?id="+id);
+        }
         return "message";
     }
 
@@ -87,15 +99,23 @@ public class BoardController {
     }
 
     @PostMapping("/modify/process")
-    public String boardModifyProcess(Model model, Integer id, Board board) {
+    public String boardModifyProcess(Model model, Integer id,Board board, Authentication authentication) {
         Board boardTemp = boardService.boardView(id);
-        boardTemp.setTitle(board.getTitle());
-        boardTemp.setContent(board.getContent());
+        String boardUsername = boardTemp.getUser().getUsername();
+        String loggedinUsername = authentication.getName();
 
-        boardService.boardWrite(boardTemp);
+        if(boardUsername.equals(loggedinUsername)) {
+            boardTemp.setTitle(board.getTitle());
+            boardTemp.setContent(board.getContent());
+            boardService.boardWrite(loggedinUsername, boardTemp);
+            model.addAttribute("message", "게시물수정이 완료되었습니다.");
+            model.addAttribute("searchUrl", "/board/view?id=" + id);
+        } else {
+            model.addAttribute("message", "본인의 게시물만 수정 가능합니다.");
+            model.addAttribute("searchUrl", "/board/view?id=" + id);
+        }
 
-        model.addAttribute("message", "게시물수정이 완료되었습니다.");
-        model.addAttribute("searchUrl", "/board/view?id=" + id);
+
         return "message";
     }
 }

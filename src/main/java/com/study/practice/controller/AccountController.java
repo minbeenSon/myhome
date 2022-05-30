@@ -30,7 +30,7 @@ public class AccountController {
     public String registerProcess(User user, Model model) {
         userService.userSave(user);
 
-        model.addAttribute("message", "회원가입완료");
+        model.addAttribute("message", "회원가입을 완료하였습니다.");
         model.addAttribute("searchUrl", "/");
         return "message";
     }
